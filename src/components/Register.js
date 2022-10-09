@@ -7,11 +7,13 @@ import { config } from "../App";
 import Footer from "./Footer";
 import Header from "./Header";
 import "./Register.css";
+import { useHistory, Link } from "react-router-dom";
 
 const Register = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   // TODO: CRIO_TASK_MODULE_REGISTER - Implement the register function
+
   /**
    * Definition for register handler
    * - Function to be called when the user clicks on the register button or submits the register form
@@ -34,6 +36,7 @@ const Register = () => {
    *      "message": "Username is already taken"
    * }
    */
+
   const [valueUsername, setValueUsername] = useState("");
   const [valuePassword, setValuePassword] = useState("");
   const [valueConfirmPassword, setValueConfirmPassword] = useState("");
@@ -82,8 +85,7 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      const res = await axios(reqOptions);
-      // console.log(res)
+      await axios(reqOptions);
       enqueueSnackbar("Registered successfully", {variant: "success"});
     } catch (error) {
       if (error.response) {
@@ -111,6 +113,7 @@ const Register = () => {
   };
 
   // TODO: CRIO_TASK_MODULE_REGISTER - Implement user input validation logic
+
   /**
    * Validate the input values so that any bad or illegal values are not passed to the backend.
    *
@@ -125,10 +128,11 @@ const Register = () => {
    * -    Check that username field is not an empty value - "Username is a required field"
    * -    Check that username field is not less than 6 characters in length - "Username must be at least 6 characters"
    * -    Check that password field is not an empty value - "Password is a required field"
-   * -    Check that password field is not less than 6 chhttps://help.crio.do/support/solutions/articles/82000890237-setup-your-local-workspace-using-dockeraracters in length - "Password must be at least 6 characters"
+   * -    Check that password field is not less than 6 characters in length - "Password must be at least 6 characters"
    * -    Check that confirmPassword field has the same value as password field - Passwords do not match
    */
-  const validateInput = (data) => {
+  
+const validateInput = (data) => {
     const {username, password, confirmPassword} = data;
 
     if (!username) {
@@ -209,7 +213,7 @@ const Register = () => {
         </Stack>
       </Box>
       <Footer />
-    </Box> 
+    </Box>
   );
 };
 
