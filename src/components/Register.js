@@ -12,6 +12,8 @@ import { useHistory, Link } from "react-router-dom";
 const Register = () => {
   const { enqueueSnackbar } = useSnackbar();
 
+  const history = useHistory();
+
   // TODO: CRIO_TASK_MODULE_REGISTER - Implement the register function
 
   /**
@@ -44,7 +46,6 @@ const Register = () => {
   const inputChangeHandler = (e) => {
     const value = e.target.value;
     const inputName = e.target.name;
-    console.log(value, inputName);
     switch (inputName) {
       case "username":
         setValueUsername(value);
@@ -69,9 +70,13 @@ const Register = () => {
     }
   
     if (!validateInput(inputData)) return;
-    
-    register(inputData);
 
+    const registerData = {
+      username: inputData.username,
+      password: inputData.password
+    }
+    
+    register(registerData);
   }
 
   const register = async (formData) => {
@@ -87,29 +92,18 @@ const Register = () => {
     try {
       await axios(reqOptions);
       enqueueSnackbar("Registered successfully", {variant: "success"});
+      history.push("/login");
+
     } catch (error) {
       if (error.response) {
-        console.log(error);
-        /* const message = error.response.data.message; */
-        enqueueSnackbar("No success: Username is already taken", {variant: "error"}); // cheat
+        enqueueSnackbar(error.response.data.message, {variant: "error"});
       } else {
         enqueueSnackbar("Something went wrong. Check that the backend is running, reachable and returns valid JSON.", {variant: "error"});
       }
+
     } finally {
       setIsLoading(false);
     }
-
-
-    /* axios(reqOptions)
-    .then(res => {
-      enqueueSnackbar("Registered successfully", {variant: "success"});
-    }).catch(error => {
-      if (error.response) {
-        enqueueSnackbar(error.response.data.message, {variant: "error"});
-      } else if (error.request) {
-        enqueueSnackbar("Something went wrong. Check that the backend is running, reachable and returns valid JSON.", {variant: "error"});
-      }
-    }) */
   };
 
   // TODO: CRIO_TASK_MODULE_REGISTER - Implement user input validation logic
@@ -159,7 +153,7 @@ const validateInput = (data) => {
   };
 
   const [isLoading, setIsLoading] = useState(false);
-  const registerButton = <Button className="button" variant="contained" onClick={registerHandler}>Register Now</Button>;
+  const registerButton = <Button className="button" variant="contained" type="button" onClick={registerHandler}>Register Now</Button>;
   const progressIndicator = <CircularProgress color="success" style={{alignSelf: "center"}}/>;
 
   return (
@@ -206,9 +200,7 @@ const validateInput = (data) => {
           {isLoading ? progressIndicator : registerButton}
           <p className="secondary-action">
             Already have an account?{" "}
-             <a className="link" href="#">
-              Login here
-             </a>
+            <Link to="/login" className="link">Login here</Link>
           </p>
         </Stack>
       </Box>
