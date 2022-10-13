@@ -59,10 +59,6 @@ const Header = ({ children, hasHiddenAuthButtons }) => {
         </Box>
         <Stack direction="row" alignItems="center" spacing={1}>
           {hasHiddenAuthButtons ? exploreButton : isLoggedIn ? userDashBoard : actionBoard}
-
-          {/* {hasHiddenAuthButtons && exploreButton}
-          {!hasHiddenAuthButtons && isLoggedIn && userDashboard}
-          {!hasHiddenAuthButtons && !isLoggedIn && actionBoard} */}
         </Stack>
       </Box>
     );
