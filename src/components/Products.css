@@ -50,6 +50,7 @@
 
 .search-desktop {
   display: none !important;
+  width: 25%;
 }
 
 @media screen and (min-width: 768px) {

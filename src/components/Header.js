@@ -6,10 +6,6 @@ import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import "./Header.css";
 
-const element = React.createElement("div", null, "Hello");
-
-console.dir(element);
-
 const Header = ({ children, hasHiddenAuthButtons }) => {
   const history = useHistory();
 
@@ -57,9 +53,10 @@ const Header = ({ children, hasHiddenAuthButtons }) => {
         <Box className="header-title">
             <img src="logo_light.svg" alt="QKart-icon"></img>
         </Box>
-        <Stack direction="row" alignItems="center" spacing={1}>
+        {children}
+        <Box>
           {hasHiddenAuthButtons ? exploreButton : isLoggedIn ? userDashBoard : actionBoard}
-        </Stack>
+        </Box>
       </Box>
     );
 };
