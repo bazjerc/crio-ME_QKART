@@ -14,6 +14,7 @@ import { config } from "../App";
 import Footer from "./Footer";
 import Header from "./Header";
 import ProductCard from "./ProductCard";
+import Cart from "./Cart";
 import "./Products.css";
 
 // Definition of Data Structures used
