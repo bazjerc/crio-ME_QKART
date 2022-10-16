@@ -72,7 +72,7 @@ export const generateCartItemsFrom = (cartData, productsData) => {
  *
  */
 export const getTotalCartValue = (items) => {
-  return items.reduce((acc, cur) => acc + cur.cost, 0);
+  return items.reduce((acc, cur) => acc + (cur.cost * cur.qty), 0);
 };
 
 
@@ -157,7 +157,7 @@ function CartItem({image, cost, name, qty, itemId, handleQuantity}) {
             handleDelete={decreaseQuantityHandler}
           />
           <Box padding="0.5rem" fontWeight="700">
-            ${cost}
+            ${cost * qty}
           </Box>
         </Box>
       </Box>

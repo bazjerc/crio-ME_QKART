@@ -370,6 +370,7 @@ const Products = () => {
         enqueueSnackbar("Item already in cart. Use the cart sidebar to update quantity or remove item.", {variant: "warning"});
         return;
       }
+    }
 
       const reqOptions = {
         method: "post",
@@ -391,9 +392,7 @@ const Products = () => {
 
       }
 
-    } else {
-
-    }
+    
 
 
   };

@@ -55,7 +55,7 @@ const Checkout = () => {
 
 
   return (
-    <>
+    {/* <>
       <Header />
       <Grid container>
         <Grid item xs={12} md={9}>
@@ -102,7 +102,7 @@ const Checkout = () => {
         </Grid>
       </Grid>
       <Footer />
-    </>
+    </> */}
   );
 };
 
