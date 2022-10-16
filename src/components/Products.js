@@ -44,10 +44,11 @@ import { generateCartItemsFrom } from "./Cart";
 const Products = () => {
   const { enqueueSnackbar } = useSnackbar();
 
-  const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
+  
   const [allProducts, setAllProducts] = useState([]);
+  const [products, setProducts] = useState([]);
+
 
   /* const [allProducts, setAllProducts] = useState([]); */
   
@@ -89,6 +90,21 @@ const Products = () => {
    * }
    */
 
+  /////////////////////////////////
+  // State for logged in
+
+  const isLoginDataPresent = () => {
+    return localStorage.getItem("username") !== null;
+  }
+
+  const userLogOutHandler = () => {
+    setIsLoggedIn(false);
+  }
+
+  const [isLoggedIn, setIsLoggedIn] = useState(isLoginDataPresent());
+
+  /////////////////////////////////
+
   useEffect(() => {
     performAPICall();
   }, []);
@@ -119,13 +135,6 @@ const Products = () => {
     }
   };
 
-
-  const productList = (
-    <Grid container spacing={2} className="product-grid">
-      {products.map(product => <ProductCard product={product} key={product._id}/>)} 
-    </Grid>
-  )
-  
 
   const progressIndicator = (
     <Stack direction="column" alignItems="center" style={{margin: "10rem 0"}}>
@@ -336,9 +345,61 @@ const Products = () => {
     options = { preventDuplicate: false }
   ) => {
 
+// On card button click
+      // check if user is logged in
+        // if false -> show warning message with text: Login to add an item to the Cart and return
+
+      // get id of item
+      // check if cartdata array contains item with same id
+        // if true -> diplay warning message with text: Item already in cart. Use the cart sidebar to update quantity or remove item. and return
+
+      // make payload object with properties id and quantity as 1
+      // make post call to ${config.endpoint}/cart with payload object and bearer token
+      // get response and call setCartProducts(generateCartItemsFrom(res.data, allProducts));
+
+    if (options) {
+      if (!isLoggedIn) {
+        enqueueSnackbar("Login to add an item to the Cart and return", {variant: "warning"});
+        return;
+      }
+
+      if (isItemInCart(cartData, productId)) {
+        enqueueSnackbar("Item already in cart. Use the cart sidebar to update quantity or remove item.", {variant: "warning"});
+        return;
+      }
+
+      const reqOptions = {
+        method: "post",
+        url: `${config.endpoint}/cart`,
+        headers: {"Authorization": `Bearer ${localStorage.getItem("token")}`},
+        data: {
+          qty,
+          productId
+        }
+      }
+
+      try {
+        const res = await axios(reqOptions);
+        setCartProducts(generateCartItemsFrom(res.data, allProducts));
+      } catch (error) {
+
+      }
+
+    } else {
+
+    }
+
+
   };
 
   /////////////////////////////////
+
+  const productList = (
+    <Grid container spacing={2} className="product-grid">
+      {products.map(product => <ProductCard product={product} key={product._id}/>)} 
+    </Grid>
+  );
+
 
   const shoppingCart = (
     <Grid item md={3} xs={12} style={{backgroundColor: "#E9F5E1"}}>
@@ -346,20 +407,7 @@ const Products = () => {
     </Grid>
   );
 
-  /////////////////////////////////
-  // State for logged in
-
-  const isLoginDataPresent = () => {
-    return localStorage.getItem("username") !== null;
-  }
-
-  const [isLoggedIn, setIsLoggedIn] = useState(isLoginDataPresent());
-
-  const userLogOutHandler = () => {
-    setIsLoggedIn(false);
-  }
-
-  /////////////////////////////////
+  
 
   return (
     <div>
