@@ -17,6 +17,8 @@ import ProductCard from "./ProductCard";
 import Cart from "./Cart";
 import "./Products.css";
 
+import { generateCartItemsFrom } from "./Cart";
+
 // Definition of Data Structures used
 
 // TODO: CRIO_TASK_MODULE_PRODUCTS - Fetch products data and store it
@@ -44,6 +46,11 @@ const Products = () => {
 
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [allProducts, setAllProducts] = useState([]);
+
+  /* const [allProducts, setAllProducts] = useState([]); */
+  
 
   /**
    * Make API call to get the products list and store it to display the products
@@ -86,6 +93,13 @@ const Products = () => {
     performAPICall();
   }, []);
 
+
+  useEffect(() => {
+    fetchCart(localStorage.getItem("token"));
+  }, [allProducts]);
+
+  
+  
   const performAPICall = async () => {
     const reqOptions = {
       method: "get",
@@ -97,6 +111,7 @@ const Products = () => {
     try {
       const res = await axios(reqOptions);
       setProducts(res.data);
+      setAllProducts(res.data);
     } catch {
       enqueueSnackbar("Something went wrong. Check that the backend is running, reachable and returns valid JSON.", {variant: "error"});
     } finally {
@@ -104,12 +119,14 @@ const Products = () => {
     }
   };
 
+
   const productList = (
     <Grid container spacing={2} className="product-grid">
       {products.map(product => <ProductCard product={product} key={product._id}/>)} 
     </Grid>
   )
   
+
   const progressIndicator = (
     <Stack direction="column" alignItems="center" style={{margin: "10rem 0"}}>
       <CircularProgress color="success" />
@@ -182,6 +199,7 @@ const Products = () => {
    *    Timer id set for the previous debounce call
    *
    */
+  
 
   const [timerId, setTimerId] = useState(null);
 
@@ -220,11 +238,24 @@ const Products = () => {
    *      "message": "Protected route, Oauth2 Bearer token not found"
    * }
    */
+
+  const [cartData, setCartData] = useState([]);
+  const [cartProducts, setCartProducts] = useState([]);
+
   const fetchCart = async (token) => {
     if (!token) return;
 
+    const reqOptions = {
+      method: "get",
+      url: `${config.endpoint}/cart`,
+      headers: {"Authorization": `Bearer ${token}`}
+    }
+
     try {
       // TODO: CRIO_TASK_MODULE_CART - Pass Bearer token inside "Authorization" header to get data from "GET /cart" API and return the response data
+      const res = await axios(reqOptions);
+      setCartData(res.data);
+      setCartProducts(generateCartItemsFrom(res.data, allProducts));
     } catch (e) {
       if (e.response && e.response.status === 400) {
         enqueueSnackbar(e.response.data.message, { variant: "error" });
@@ -255,6 +286,7 @@ const Products = () => {
    *
    */
   const isItemInCart = (items, productId) => {
+    return items.some(item => item.productId === productId);
   };
 
   /**
@@ -293,6 +325,8 @@ const Products = () => {
    *      "message": "Product doesn't exist"
    * }
    */
+
+
   const addToCart = async (
     token,
     items,
@@ -301,12 +335,35 @@ const Products = () => {
     qty,
     options = { preventDuplicate: false }
   ) => {
+
   };
 
+  /////////////////////////////////
+
+  const shoppingCart = (
+    <Grid item md={3} xs={12} style={{backgroundColor: "#E9F5E1"}}>
+      <Cart products={allProducts} items={cartProducts}/>
+    </Grid>
+  );
+
+  /////////////////////////////////
+  // State for logged in
+
+  const isLoginDataPresent = () => {
+    return localStorage.getItem("username") !== null;
+  }
+
+  const [isLoggedIn, setIsLoggedIn] = useState(isLoginDataPresent());
+
+  const userLogOutHandler = () => {
+    setIsLoggedIn(false);
+  }
+
+  /////////////////////////////////
 
   return (
     <div>
-      <Header>
+      <Header onUserLogOut={userLogOutHandler}>
         {/* TODO: CRIO_TASK_MODULE_PRODUCTS - Display search bar in the header for Products page */}
         <div className="search-desktop">
           <TextField
@@ -341,16 +398,21 @@ const Products = () => {
         placeholder="Search for items/categories"
         name="search"
       />
-      <Box className="hero">
-        <p className="hero-heading">
-          India’s <span className="hero-highlight">FASTEST DELIVERY</span>{" "}
-          to your door step
-        </p>
-      </Box>
-      <Box style={{padding: "2rem 1rem"}}>
-        {isLoading && progressIndicator}
-        {products.length !== 0 ? productList : noProductsIndicator}
-      </Box>
+      <Grid container>
+        <Grid item md={isLoggedIn ? 9 : 12} xs={12}>
+          <Box className="hero">
+            <p className="hero-heading">
+              India’s <span className="hero-highlight">FASTEST DELIVERY</span>{" "}
+              to your door step
+            </p>
+          </Box>
+          <Box style={{padding: "2rem 1rem"}}>
+            {isLoading && progressIndicator}
+            {products.length !== 0 ? productList : noProductsIndicator}
+          </Box>
+        </Grid>
+        {isLoggedIn && shoppingCart}
+      </Grid>
       <Footer/>
     </div>
   );

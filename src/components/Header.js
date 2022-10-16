@@ -6,11 +6,11 @@ import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import "./Header.css";
 
-const Header = ({ children, hasHiddenAuthButtons }) => {
+const Header = ({ children, hasHiddenAuthButtons, onUserLogOut }) => {
   const history = useHistory();
 
   const isLoginDataPresent = () => {
-    return localStorage.getItem("username");
+    return localStorage.getItem("username") !== null;
   }
 
   const [isLoggedIn, setIsLoggedIn] = useState(isLoginDataPresent());
@@ -18,6 +18,7 @@ const Header = ({ children, hasHiddenAuthButtons }) => {
   const logoutUser = () => {
     localStorage.clear();
     setIsLoggedIn(false);
+    onUserLogOut();
     window.location.reload();
   }
 
