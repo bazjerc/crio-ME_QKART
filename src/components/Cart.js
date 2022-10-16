@@ -114,7 +114,16 @@ const ItemQuantity = ({
 //////////////
 // Cart item component
 
-function CartItem({image, cost, name, qty}) {
+function CartItem({image, cost, name, qty, itemId, handleQuantity}) {
+
+  const increaseQuantityHandler = () => {
+    handleQuantity(itemId, qty + 1, false);
+  }
+
+  const decreaseQuantityHandler = () => {
+    handleQuantity(itemId, qty - 1, false);
+  }
+
 
   return (
     <Box display="flex" alignItems="flex-start" padding="1rem">
@@ -141,8 +150,11 @@ function CartItem({image, cost, name, qty}) {
           justifyContent="space-between"
           alignItems="center"
         >
-          <ItemQuantity value={qty}
+          <ItemQuantity 
             // Add required props by checking implementation
+            value={qty}
+            handleAdd={increaseQuantityHandler}
+            handleDelete={decreaseQuantityHandler}
           />
           <Box padding="0.5rem" fontWeight="700">
             ${cost}
@@ -189,7 +201,7 @@ const Cart = ({
     <>
       <Box className="cart">
         {/* TODO: CRIO_TASK_MODULE_CART - Display view for each cart item with non-zero quantity */
-          items.map(item => <CartItem {...item} key={item._id}/>)
+          items.map(item => <CartItem {...item} key={item._id} itemId={item._id} handleQuantity={handleQuantity}/>)
         }
         <Box
           padding="1rem"

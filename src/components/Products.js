@@ -355,7 +355,10 @@ const Products = () => {
 
       // make payload object with properties id and quantity as 1
       // make post call to ${config.endpoint}/cart with payload object and bearer token
-      // get response and call setCartProducts(generateCartItemsFrom(res.data, allProducts));
+      // update cartData state with res.data
+      // call setCartProducts(generateCartItemsFrom(res.data, allProducts)) to update cart;
+// On sidebar click
+
 
     if (options) {
       if (!isLoggedIn) {
@@ -406,7 +409,7 @@ const Products = () => {
 
   const shoppingCart = (
     <Grid item md={3} xs={12} style={{backgroundColor: "#E9F5E1"}}>
-      <Cart products={allProducts} items={cartProducts}/>
+      <Cart products={allProducts} items={cartProducts} handleQuantity={addToCart} />
     </Grid>
   );
 
