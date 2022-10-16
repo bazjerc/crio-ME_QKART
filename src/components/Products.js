@@ -337,9 +337,9 @@ const Products = () => {
 
 
   const addToCart = async (
-    token,
+    /* token,
     items,
-    products,
+    products, */
     productId,
     qty,
     options = { preventDuplicate: false }
@@ -373,17 +373,19 @@ const Products = () => {
         url: `${config.endpoint}/cart`,
         headers: {"Authorization": `Bearer ${localStorage.getItem("token")}`},
         data: {
-          qty,
-          productId
+          productId: productId,
+          qty: qty
         }
       }
 
-      try {
+      console.log(productId, qty)
+
+      /* try {
         const res = await axios(reqOptions);
         setCartProducts(generateCartItemsFrom(res.data, allProducts));
       } catch (error) {
 
-      }
+      } */
 
     } else {
 
@@ -396,7 +398,7 @@ const Products = () => {
 
   const productList = (
     <Grid container spacing={2} className="product-grid">
-      {products.map(product => <ProductCard product={product} key={product._id}/>)} 
+      {products.map(product => <ProductCard product={product} key={product._id} handleAddToCart={addToCart} />)} 
     </Grid>
   );
 
