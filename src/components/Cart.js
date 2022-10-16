@@ -71,8 +71,8 @@ export const generateCartItemsFrom = (cartData, productsData) => {
  *    Value of all items in the cart
  *
  */
-export const getTotalCartValue = (items = []) => {
-
+export const getTotalCartValue = (items) => {
+  return items.reduce((acc, cur) => acc + cur.cost, 0);
 };
 
 

@@ -380,12 +380,13 @@ const Products = () => {
 
       console.log(productId, qty)
 
-      /* try {
+      try {
         const res = await axios(reqOptions);
+        setCartData(res.data);
         setCartProducts(generateCartItemsFrom(res.data, allProducts));
       } catch (error) {
 
-      } */
+      }
 
     } else {
 
