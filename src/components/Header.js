@@ -18,7 +18,6 @@ const Header = ({ children, hasHiddenAuthButtons, onUserLogOut }) => {
   const logoutUser = () => {
     localStorage.clear();
     setIsLoggedIn(false);
-    onUserLogOut();
     window.location.reload();
   }
 
