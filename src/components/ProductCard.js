@@ -27,7 +27,7 @@ const ProductCard = ({ product, handleAddToCart }) => {
           <Rating value={product.rating} precision={1} name="read-only" readOnly/>
         </CardContent>
         <CardActions className="card-actions">
-          <Button variant="contained" className="card-button" onClick={() => handleAddToCart(product._id, 1)}><AddShoppingCartOutlined style={{marginRight: "0.5rem"}}/>ADD TO CART</Button>
+          <Button variant="contained" className="card-button" onClick={() => handleAddToCart(localStorage.getItem("token"), null, null, product._id, 1, { preventDuplicate: true })}><AddShoppingCartOutlined style={{marginRight: "0.5rem"}}/>ADD TO CART</Button>
         </CardActions>
       </Card>
     </Grid>

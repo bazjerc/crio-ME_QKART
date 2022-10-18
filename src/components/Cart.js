@@ -47,10 +47,7 @@ import "./Cart.css";
  *    Array of objects with complete data on products in cart
  *
  */
-
 export const generateCartItemsFrom = (cartData, productsData) => {
-  if (productsData.length === 0) return [];
-  
   const cartItems = [];
 
   cartData.forEach(itemData => {
@@ -71,7 +68,7 @@ export const generateCartItemsFrom = (cartData, productsData) => {
  *    Value of all items in the cart
  *
  */
-export const getTotalCartValue = (items) => {
+export const getTotalCartValue = (items = []) => {
   return items.reduce((acc, cur) => acc + (cur.cost * cur.qty), 0);
 };
 
@@ -90,6 +87,7 @@ export const getTotalCartValue = (items) => {
  * 
  * 
  */
+
 const ItemQuantity = ({
   value,
   handleAdd,
@@ -111,62 +109,6 @@ const ItemQuantity = ({
 };
 
 
-//////////////
-// Cart item component
-
-function CartItem({image, cost, name, qty, itemId, handleQuantity}) {
-
-  const increaseQuantityHandler = () => {
-    handleQuantity(itemId, qty + 1, false);
-  }
-
-  const decreaseQuantityHandler = () => {
-    handleQuantity(itemId, qty - 1, false);
-  }
-
-
-  return (
-    <Box display="flex" alignItems="flex-start" padding="1rem">
-      <Box className="image-container">
-        <img
-          // Add product image
-          src={image}
-          // Add product name as alt eext
-          alt={name}
-          width="100%"
-           height="100%"
-        />
-      </Box>
-      <Box
-        display="flex"
-        flexDirection="column"
-        justifyContent="space-between"
-        height="6rem"
-        paddingX="1rem"
-      >
-        <div>{name}</div>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <ItemQuantity 
-            // Add required props by checking implementation
-            value={qty}
-            handleAdd={increaseQuantityHandler}
-            handleDelete={decreaseQuantityHandler}
-          />
-          <Box padding="0.5rem" fontWeight="700">
-            ${cost * qty}
-          </Box>
-        </Box>
-      </Box>
-    </Box>
-  );
-}
-////////////////////////////////
-
-
 /**
  * Component to display the Cart view
  * 
@@ -186,6 +128,7 @@ const Cart = ({
   items = [],
   handleQuantity,
 }) => {
+
   const history = useHistory();
 
   if (!items.length) {
@@ -203,8 +146,44 @@ const Cart = ({
     <>
       <Box className="cart">
         {/* TODO: CRIO_TASK_MODULE_CART - Display view for each cart item with non-zero quantity */
-          items.map(item => <CartItem {...item} key={item._id} itemId={item._id} handleQuantity={handleQuantity}/>)
-        }
+        items.map(item => (
+          <Box display="flex" alignItems="flex-start" padding="1rem" key={item._id}>
+            <Box className="image-container">
+                <img
+                    // Add product image
+                    src={item.image}
+                    // Add product name as alt eext
+                    alt={item.name}
+                    width="100%"
+                    height="100%"
+                />
+            </Box>
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="space-between"
+              height="6rem"
+              paddingX="1rem"
+            >
+              <div>{/* Add product name */item.name}</div>
+              <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+              >
+                <ItemQuantity
+                  value={item.qty}
+                  handleAdd={() => handleQuantity(localStorage.getItem("token"), null, null, item._id, item.qty + 1)}
+                  handleDelete={() => handleQuantity(localStorage.getItem("token"), null, null, item._id, item.qty - 1)}
+                // Add required props by checking implementation
+                />
+                <Box padding="0.5rem" fontWeight="700">
+                  ${/* Add product cost */item.cost}
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+    ))}
         <Box
           padding="1rem"
           display="flex"

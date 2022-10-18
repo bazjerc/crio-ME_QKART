@@ -14,10 +14,8 @@ import { config } from "../App";
 import Footer from "./Footer";
 import Header from "./Header";
 import ProductCard from "./ProductCard";
-import Cart from "./Cart";
+import Cart, { generateCartItemsFrom } from "./Cart";
 import "./Products.css";
-
-import { generateCartItemsFrom } from "./Cart";
 
 // Definition of Data Structures used
 
@@ -41,17 +39,15 @@ import { generateCartItemsFrom } from "./Cart";
  */
 
 
+let allProducts = [];
+
 const Products = () => {
   const { enqueueSnackbar } = useSnackbar();
 
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-
-  /* const [allProducts, setAllProducts] = useState([]); */
-  
+  const isLoggedIn = localStorage.getItem("token") !== null;
 
   /**
    * Make API call to get the products list and store it to display the products
@@ -90,32 +86,14 @@ const Products = () => {
    * }
    */
 
-  /////////////////////////////////
-  // State for logged in
-
-  const isLoginDataPresent = () => {
-    return localStorage.getItem("username") !== null;
-  }
-
-  const userLogOutHandler = () => {
-    setIsLoggedIn(false);
-  }
-
-  const [isLoggedIn, setIsLoggedIn] = useState(isLoginDataPresent());
-
-  /////////////////////////////////
-
   useEffect(() => {
-    performAPICall();
+    const fetchData = async () => {
+      await performAPICall();
+      await fetchCart(localStorage.getItem("token"));
+    }
+    fetchData();
   }, []);
 
-
-  useEffect(() => {
-    fetchCart(localStorage.getItem("token"));
-  }, [allProducts]);
-
-  
-  
   const performAPICall = async () => {
     const reqOptions = {
       method: "get",
@@ -127,7 +105,7 @@ const Products = () => {
     try {
       const res = await axios(reqOptions);
       setProducts(res.data);
-      setAllProducts(res.data);
+      allProducts = res.data;
     } catch {
       enqueueSnackbar("Something went wrong. Check that the backend is running, reachable and returns valid JSON.", {variant: "error"});
     } finally {
@@ -135,13 +113,6 @@ const Products = () => {
     }
   };
 
-
-  const progressIndicator = (
-    <Stack direction="column" alignItems="center" style={{margin: "10rem 0"}}>
-      <CircularProgress color="success" />
-      <p>Loading Products...</p>
-    </Stack>
-  );
 
   // TODO: CRIO_TASK_MODULE_PRODUCTS - Implement search logic
   /**
@@ -178,6 +149,7 @@ const Products = () => {
     try {
       const res = await axios(reqOptions);
       setProducts(res.data);
+      allProducts = res.data;
     } catch (error) {
       if (error.response) {
         setProducts(error.response.data);
@@ -208,7 +180,6 @@ const Products = () => {
    *    Timer id set for the previous debounce call
    *
    */
-  
 
   const [timerId, setTimerId] = useState(null);
 
@@ -249,7 +220,7 @@ const Products = () => {
    */
 
   const [cartData, setCartData] = useState([]);
-  const [cartProducts, setCartProducts] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
 
   const fetchCart = async (token) => {
     if (!token) return;
@@ -264,7 +235,7 @@ const Products = () => {
       // TODO: CRIO_TASK_MODULE_CART - Pass Bearer token inside "Authorization" header to get data from "GET /cart" API and return the response data
       const res = await axios(reqOptions);
       setCartData(res.data);
-      setCartProducts(generateCartItemsFrom(res.data, allProducts));
+      setCartItems(generateCartItemsFrom(res.data, allProducts));
     } catch (e) {
       if (e.response && e.response.status === 400) {
         enqueueSnackbar(e.response.data.message, { variant: "error" });
@@ -334,89 +305,78 @@ const Products = () => {
    *      "message": "Product doesn't exist"
    * }
    */
-
-
   const addToCart = async (
-    /* token,
+    token,
     items,
-    products, */
+    products,
     productId,
     qty,
     options = { preventDuplicate: false }
   ) => {
 
-// On card button click
-      // check if user is logged in
-        // if false -> show warning message with text: Login to add an item to the Cart and return
-
-      // get id of item
-      // check if cartdata array contains item with same id
-        // if true -> diplay warning message with text: Item already in cart. Use the cart sidebar to update quantity or remove item. and return
-
-      // make payload object with properties id and quantity as 1
-      // make post call to ${config.endpoint}/cart with payload object and bearer token
-      // update cartData state with res.data
-      // call setCartProducts(generateCartItemsFrom(res.data, allProducts)) to update cart;
-// On sidebar click
-
-
-    if (options) {
+    if (options.preventDuplicate) {
       if (!isLoggedIn) {
-        enqueueSnackbar("Login to add an item to the Cart and return", {variant: "warning"});
+        enqueueSnackbar("Login to add an item to the Cart", {variant: "warning"});
         return;
       }
-
       if (isItemInCart(cartData, productId)) {
         enqueueSnackbar("Item already in cart. Use the cart sidebar to update quantity or remove item.", {variant: "warning"});
         return;
       }
     }
 
-      const reqOptions = {
-        method: "post",
-        url: `${config.endpoint}/cart`,
-        headers: {"Authorization": `Bearer ${localStorage.getItem("token")}`},
-        data: {
-          productId: productId,
-          qty: qty
-        }
+    const reqOptions = {
+      method: "post",
+      url: `${config.endpoint}/cart`,
+      headers: {"Authorization": `Bearer ${token}`},
+      data: {
+        productId: productId,
+        qty: qty
       }
+    }
 
-      console.log(productId, qty)
-
-      try {
-        const res = await axios(reqOptions);
-        setCartData(res.data);
-        setCartProducts(generateCartItemsFrom(res.data, allProducts));
-      } catch (error) {
-
+    try {
+      const res = await axios(reqOptions);
+      setCartData(res.data);
+      setCartItems(generateCartItemsFrom(res.data, allProducts));
+    } catch (error) {
+      if (error.response) {
+        enqueueSnackbar(error.response.data.message, {variant: "warning"});
+      } else {
+        enqueueSnackbar(
+          "Could not fetch cart details. Check that the backend is running, reachable and returns valid JSON.",
+          {
+            variant: "error",
+          }
+        );
       }
-
-    
-
-
+    }
   };
 
-  /////////////////////////////////
 
+  // Component elements
   const productList = (
     <Grid container spacing={2} className="product-grid">
-      {products.map(product => <ProductCard product={product} key={product._id} handleAddToCart={addToCart} />)} 
+      {products.map(product => <ProductCard product={product} handleAddToCart={addToCart} key={product._id}/>)} 
     </Grid>
+  )
+  
+  const progressIndicator = (
+    <Stack direction="column" alignItems="center" style={{margin: "10rem 0"}}>
+      <CircularProgress color="success" />
+      <p>Loading Products...</p>
+    </Stack>
   );
-
 
   const shoppingCart = (
     <Grid item md={3} xs={12} style={{backgroundColor: "#E9F5E1"}}>
-      <Cart products={allProducts} items={cartProducts} handleQuantity={addToCart} />
+      <Cart products={allProducts} items={cartItems} handleQuantity={addToCart}/>
     </Grid>
   );
 
-  
-
   return (
     <div>
-      <Header onUserLogOut={userLogOutHandler}>
+      <Header>
         {/* TODO: CRIO_TASK_MODULE_PRODUCTS - Display search bar in the header for Products page */}
         <div className="search-desktop">
           <TextField
