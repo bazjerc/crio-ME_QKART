@@ -6,7 +6,7 @@ import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import "./Header.css";
 
-const Header = ({ children, hasHiddenAuthButtons, onUserLogOut }) => {
+const Header = ({ children, hasHiddenAuthButtons }) => {
   const history = useHistory();
 
   const isLoginDataPresent = () => {

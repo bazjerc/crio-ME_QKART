@@ -72,7 +72,21 @@ export const getTotalCartValue = (items = []) => {
   return items.reduce((acc, cur) => acc + (cur.cost * cur.qty), 0);
 };
 
+// TODO: CRIO_TASK_MODULE_CHECKOUT - Implement function to return total cart quantity
+/**
+ * Return the sum of quantities of all products added to the cart
+ *
+ * @param { Array.<CartItem> } items
+ *    Array of objects with complete data on products in cart
+ *
+ * @returns { Number }
+ *    Total quantity of products added to the cart
+ *
+ */
+export const getTotalItems = (items = []) => {
+};
 
+// TODO: CRIO_TASK_MODULE_CHECKOUT - Add static quantity view for Checkout page cart
 /**
  * Component to display the current quantity for a product and + and - buttons to update product quantity on cart
  * 
@@ -85,6 +99,8 @@ export const getTotalCartValue = (items = []) => {
  * @param {Function} handleDelete
  *    Handler function which reduces the quantity of a product in cart by 1
  * 
+ * @param {Boolean} isReadOnly
+ *    If product quantity on cart is to be displayed as read only without the + - options to change quantity
  * 
  */
 
@@ -108,7 +124,6 @@ const ItemQuantity = ({
   );
 };
 
-
 /**
  * Component to display the Cart view
  * 
@@ -121,8 +136,11 @@ const ItemQuantity = ({
  * @param {Function} handleDelete
  *    Current quantity of product in cart
  * 
+ * @param {Boolean} isReadOnly
+ *    If product quantity on cart is to be displayed as read only without the + - options to change quantity
  * 
  */
+
 const Cart = ({
   products,
   items = [],
