@@ -84,6 +84,7 @@ export const getTotalCartValue = (items = []) => {
  *
  */
 export const getTotalItems = (items = []) => {
+  return items.reduce((acc, cur) => acc + cur.qty, 0);
 };
 
 // TODO: CRIO_TASK_MODULE_CHECKOUT - Add static quantity view for Checkout page cart
@@ -108,21 +109,27 @@ const ItemQuantity = ({
   value,
   handleAdd,
   handleDelete,
+  isReadOnly
 }) => {
   return (
     <Stack direction="row" alignItems="center">
-      <IconButton size="small" color="primary" onClick={handleDelete}>
-        <RemoveOutlined />
-      </IconButton>
+      {!isReadOnly &&
+        <IconButton size="small" color="primary" onClick={handleDelete}>
+          <RemoveOutlined />
+        </IconButton>
+      }
       <Box padding="0.5rem" data-testid="item-qty">
-        {value}
+        {isReadOnly && "Qty: "}{value}
       </Box>
-      <IconButton size="small" color="primary" onClick={handleAdd}>
-        <AddOutlined />
-      </IconButton>
+      {!isReadOnly &&
+        <IconButton size="small" color="primary" onClick={handleAdd}>
+          <AddOutlined />
+        </IconButton>
+      }
     </Stack>
   );
 };
+
 
 /**
  * Component to display the Cart view
@@ -145,6 +152,7 @@ const Cart = ({
   products,
   items = [],
   handleQuantity,
+  isReadOnly
 }) => {
 
   const history = useHistory();
@@ -170,7 +178,7 @@ const Cart = ({
                 <img
                     // Add product image
                     src={item.image}
-                    // Add product name as alt eext
+                    // Add product name as alt text
                     alt={item.name}
                     width="100%"
                     height="100%"
@@ -193,6 +201,7 @@ const Cart = ({
                   value={item.qty}
                   handleAdd={() => handleQuantity(localStorage.getItem("token"), null, null, item._id, item.qty + 1)}
                   handleDelete={() => handleQuantity(localStorage.getItem("token"), null, null, item._id, item.qty - 1)}
+                  isReadOnly={isReadOnly ? true : false}
                 // Add required props by checking implementation
                 />
                 <Box padding="0.5rem" fontWeight="700">
@@ -221,18 +230,19 @@ const Cart = ({
             ${getTotalCartValue(items)}
           </Box>
         </Box>
-
-        <Box display="flex" justifyContent="flex-end" className="cart-footer">
-          <Button
-            color="primary"
-            variant="contained"
-            startIcon={<ShoppingCart />}
-            className="checkout-btn"
-            onClick={() => history.push("/checkout")}
-          >
-            Checkout
-          </Button>
-        </Box>
+        {
+          !isReadOnly && (<Box display="flex" justifyContent="flex-end" className="cart-footer">
+            <Button
+              color="primary"
+              variant="contained"
+              startIcon={<ShoppingCart />}
+              className="checkout-btn"
+              onClick={() => history.push("/checkout")}
+            >
+              Checkout
+            </Button>
+          </Box>)
+        }
       </Box>
     </>
   );

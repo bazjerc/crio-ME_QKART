@@ -13,7 +13,7 @@ import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { config } from "../App";
-import Cart, { getTotalCartValue, generateCartItemsFrom } from "./Cart";
+import Cart, { getTotalCartValue, generateCartItemsFrom, getTotalItems } from "./Cart";
 import "./Checkout.css";
 import Footer from "./Footer";
 import Header from "./Header";
@@ -472,6 +472,25 @@ const Checkout = () => {
         </Grid>
         <Grid item xs={12} md={3} bgcolor="#E9F5E1">
           <Cart isReadOnly products={products} items={items} />
+          <Stack my="1rem" className="cart" gap="1rem" style={{padding: "1rem", marginTop: "0"}}>
+            <Box style={{fontSize: "1.6rem", fontWeight: "bold", marginBottom: "0.3rem"}}>Order Details</Box>
+            <Box display="flex" justifyContent="space-between" color="#3C3C3C">
+              <Box>Products</Box>
+              <Box>{getTotalItems(items)}</Box>
+            </Box>
+            <Box display="flex" justifyContent="space-between"color="#3C3C3C">
+              <Box>Subtotal</Box>
+              <Box>${getTotalCartValue(items)}</Box>
+            </Box>
+            <Box display="flex" justifyContent="space-between" color="#3C3C3C">
+              <Box>Shipping Charges</Box>
+              <Box>${"0"}</Box>
+            </Box>
+            <Box display="flex" justifyContent="space-between" style={{fontSize: "1.2rem", fontWeight: "bold", marginTop: "0.3rem"}}>
+              <Box>Total</Box>
+              <Box>${getTotalCartValue(items)}</Box>
+            </Box>
+          </Stack>
         </Grid>
       </Grid>
       <Footer />
