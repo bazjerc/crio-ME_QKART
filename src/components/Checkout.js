@@ -10,13 +10,15 @@ import {
 import { Box } from "@mui/system";
 import axios from "axios";
 import { useSnackbar } from "notistack";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { config } from "../App";
 import Cart, { getTotalCartValue, generateCartItemsFrom, getTotalItems } from "./Cart";
 import "./Checkout.css";
 import Footer from "./Footer";
 import Header from "./Header";
+
+import DeleteIcon from '@mui/icons-material/Delete';
 
 // Definition of Data Structures used
 /**
@@ -111,6 +113,15 @@ const AddNewAddressView = ({
     </Box>
   );
 };
+
+const AddressItem = (props) => {
+  return (
+    <Box className={"address-item" + (props.isSelected ? " selected" : "")} onClick={() => props.onSelect(props.id)}>
+      <Typography>{props.address}</Typography>
+      <Button variant="text" startIcon={<DeleteIcon />}>Delete</Button>
+    </Box>
+  )
+} 
 
 const Checkout = () => {
   const token = localStorage.getItem("token");
@@ -383,8 +394,25 @@ const Checkout = () => {
   const performCheckout = async (token, items, addresses) => {
   };
 
+  const selectAddressHandler = (addressId) => {
+    setAddresses(addresses => ({...addresses, selected: addressId}));
+  }
+
   // TODO: CRIO_TASK_MODULE_CHECKOUT - Fetch addressses if logged in, otherwise show info message and redirect to Products page
 
+  useLayoutEffect(() => {
+    if (!localStorage.getItem("username")) {
+      enqueueSnackbar("You must be logged in to access checkout page", {variant: "warning"})
+      history.push("/login");
+    }
+  });
+
+  useEffect(() => {
+    const showAddress = async () => {
+      await getAddresses(token);
+    }
+    showAddress();
+  }, []);
 
   // Fetch products and cart data on page load
   useEffect(() => {
@@ -418,10 +446,14 @@ const Checkout = () => {
             </Typography>
             <Divider />
             <Box>
-              {/* TODO: CRIO_TASK_MODULE_CHECKOUT - Display list of addresses and corresponding "Delete" buttons, if present, of which 1 can be selected */}
-               <Typography my="1rem">
-                 No addresses found for this account. Please add one to proceed
-               </Typography>
+              {/* TODO: CRIO_TASK_MODULE_CHECKOUT - Display list of addresses and corresponding "Delete" buttons, if present, of which 1 can be selected */
+                addresses.all.map(address => <AddressItem address={address.address} id={address._id} isSelected={addresses.selected === address._id} key={address._id} onSelect={selectAddressHandler} />)
+              }
+              {!addresses.all.length && 
+                <Typography my="1rem">
+                  No addresses found for this account. Please add one to proceed
+                </Typography>
+              }
             </Box>
 
             {/* TODO: CRIO_TASK_MODULE_CHECKOUT - Dislay either "Add new address" button or the <AddNewAddressView> component to edit the currently selected address */}

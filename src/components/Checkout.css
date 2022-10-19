@@ -12,6 +12,7 @@
     margin: 1rem 0;
     border-radius: 5px;
     cursor: pointer;
+    border: 1px solid #ddd;
 }
 
 .shipping-container {
@@ -23,9 +24,9 @@
     background-color: #E9F5E1;
 }
 
-.not-selected {
+/* .not-selected {
     border: 1px solid #ddd;
-}
+} */
 
 p {
     color: #3C3C3C;
