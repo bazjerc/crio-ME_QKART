@@ -18,8 +18,6 @@ import "./Checkout.css";
 import Footer from "./Footer";
 import Header from "./Header";
 
-import DeleteIcon from '@mui/icons-material/Delete';
-
 // Definition of Data Structures used
 /**
  * @typedef {Object} Product - Data on product available to buy
@@ -91,21 +89,30 @@ const AddNewAddressView = ({
   handleNewAddress,
   addAddress,
 }) => {
+
+
   return (
     <Box display="flex" flexDirection="column">
       <TextField
         multiline
         minRows={4}
         placeholder="Enter your complete address"
+        value={newAddress.value}
+        onChange={(e) => handleNewAddress(newAddress => ({...newAddress, value: e.target.value}))}
       />
       <Stack direction="row" my="1rem">
         <Button
           variant="contained"
+          onClick={async () => {
+          await addAddress(token, newAddress.value);
+          handleNewAddress({isAddingNewAddress: false, value: ""})
+          }}
         >
           Add
         </Button>
         <Button
           variant="text"
+          onClick={() => handleNewAddress({isAddingNewAddress: false, value: ""})}
         >
           Cancel
         </Button>
@@ -116,9 +123,9 @@ const AddNewAddressView = ({
 
 const AddressItem = (props) => {
   return (
-    <Box className={"address-item" + (props.isSelected ? " selected" : "")} onClick={() => props.onSelect(props.id)}>
+    <Box className={"address-item" + (props.isSelected ? " selected" : "")} onClick={(e) => {e.target.classList.contains("address-item") && props.onSelect(props.id)}}>
       <Typography>{props.address}</Typography>
-      <Button variant="text" startIcon={<DeleteIcon />}>Delete</Button>
+      <Button variant="text" onClick={() => props.onDelete(props.token, props.id)} startIcon={<Delete />}>Delete</Button>
     </Box>
   )
 } 
@@ -262,9 +269,19 @@ const Checkout = () => {
    * }
    */
   const addAddress = async (token, newAddress) => {
+    const reqOptions = {
+      method: "post",
+      url: `${config.endpoint}/user/addresses`,
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      data: {address: newAddress} 
+    }
+
     try {
       // TODO: CRIO_TASK_MODULE_CHECKOUT - Add new address to the backend and display the latest list of addresses
-
+      const res = await axios(reqOptions);
+      setAddresses(addresses => ({...addresses, all: res.data}));
     } catch (e) {
       if (e.response) {
         enqueueSnackbar(e.response.data.message, { variant: "error" });
@@ -314,9 +331,18 @@ const Checkout = () => {
    * }
    */
   const deleteAddress = async (token, addressId) => {
+    const reqOptions = {
+      method: "delete",
+      url: `${config.endpoint}/user/addresses/${addressId}`,
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    } 
+    
     try {
       // TODO: CRIO_TASK_MODULE_CHECKOUT - Delete selected address from the backend and display the latest list of addresses
-
+      const res = await axios(reqOptions);
+      setAddresses(addresses => ({...addresses, all: res.data}));
     } catch (e) {
       if (e.response) {
         enqueueSnackbar(e.response.data.message, { variant: "error" });
@@ -407,13 +433,6 @@ const Checkout = () => {
     }
   });
 
-  useEffect(() => {
-    const showAddress = async () => {
-      await getAddresses(token);
-    }
-    showAddress();
-  }, []);
-
   // Fetch products and cart data on page load
   useEffect(() => {
     const onLoadHandler = async () => {
@@ -425,6 +444,8 @@ const Checkout = () => {
         const cartDetails = await generateCartItemsFrom(cartData, productsData);
         setItems(cartDetails);
       }
+
+      await getAddresses(token);
     };
     onLoadHandler();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -446,8 +467,9 @@ const Checkout = () => {
             </Typography>
             <Divider />
             <Box>
-              {/* TODO: CRIO_TASK_MODULE_CHECKOUT - Display list of addresses and corresponding "Delete" buttons, if present, of which 1 can be selected */
-                addresses.all.map(address => <AddressItem address={address.address} id={address._id} isSelected={addresses.selected === address._id} key={address._id} onSelect={selectAddressHandler} />)
+              {/* TODO: CRIO_TASK_MODULE_CHECKOUT - Display list of addresses and corresponding "Delete" buttons, if present, of which 1 can be selected */}
+              {
+                addresses.all.map(address => <AddressItem token={token} address={address.address} id={address._id} isSelected={addresses.selected === address._id} key={address._id} onSelect={selectAddressHandler} onDelete={deleteAddress}/>)
               }
               {!addresses.all.length && 
                 <Typography my="1rem">
@@ -457,27 +479,25 @@ const Checkout = () => {
             </Box>
 
             {/* TODO: CRIO_TASK_MODULE_CHECKOUT - Dislay either "Add new address" button or the <AddNewAddressView> component to edit the currently selected address */}
-            <Button
+            {!(newAddress.isAddingNewAddress) && 
+              <Button
                 color="primary"
                 variant="contained"
                 id="add-new-btn"
                 size="large"
-                onClick={() => {
-                  setNewAddress((currNewAddress) => ({
-                    ...currNewAddress,
-                    isAddingNewAddress: true,
-                  }));
-                }}
+                onClick={() => setNewAddress({isAddingNewAddress: true, value: ""})}
               >
                 Add new address
-            </Button>
-            <AddNewAddressView
+              </Button>
+            }
+            {newAddress.isAddingNewAddress && 
+              <AddNewAddressView
                 token={token}
                 newAddress={newAddress}
                 handleNewAddress={setNewAddress}
                 addAddress={addAddress}
-            />
-
+              />
+            }
             <Typography color="#3C3C3C" variant="h4" my="1rem">
               Payment
             </Typography>
