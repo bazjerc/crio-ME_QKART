@@ -383,6 +383,19 @@ const Checkout = () => {
    *
    */
   const validateRequest = (items, addresses) => {
+    if (getTotalCartValue(items) > Number(localStorage.getItem("balance"))) {
+      enqueueSnackbar("You do not have enough balance in your wallet for this purchase", {variant: "warning"});
+      return false;
+    }
+    if (addresses.all.length === 0) {
+      enqueueSnackbar("Please add a new address before proceeding.", {variant: "warning"});
+      return false;
+    }
+    if (!addresses.selected) {
+      enqueueSnackbar("Please select one shipping address to proceed.", {variant: "warning"});
+      return false;
+    }
+    return true;
   };
 
   // TODO: CRIO_TASK_MODULE_CHECKOUT
@@ -418,6 +431,33 @@ const Checkout = () => {
    *
    */
   const performCheckout = async (token, items, addresses) => {
+    if (!validateRequest(items, addresses)) return;
+
+    const reqOptions = {
+      method: "post",
+      url: `${config.endpoint}/cart/checkout`,
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      data: {
+        addressId: addresses.selected
+      }
+    }
+
+    try {
+      const res = await axios(reqOptions);
+      if (res.status === 200) {
+        localStorage.setItem("balance", (Number(localStorage.getItem("balance")) - getTotalCartValue(items)));
+        enqueueSnackbar("Order placed successfully", {variant: "success"});
+        history.push("/thanks");
+      }
+    } catch (error) {
+      if (error.response) {
+        enqueueSnackbar("Wallet balance not sufficient to place order", {variant: "warning"});
+      } else {
+        enqueueSnackbar("Something went wrong. Check that the backend is running, reachable and returns valid JSON.", {variant: "error"});
+      }
+    } 
   };
 
   const selectAddressHandler = (addressId) => {
@@ -517,6 +557,7 @@ const Checkout = () => {
             <Button
               startIcon={<CreditCard />}
               variant="contained"
+              onClick={() => performCheckout(token, items, addresses)}
             >
               PLACE ORDER
             </Button>
@@ -538,9 +579,9 @@ const Checkout = () => {
               <Box>Shipping Charges</Box>
               <Box>${"0"}</Box>
             </Box>
-            <Box display="flex" justifyContent="space-between" style={{fontSize: "1.2rem", fontWeight: "bold", marginTop: "0.3rem"}}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" style={{fontSize: "1.2rem", fontWeight: "bold", marginTop: "0.3rem"}}>
               <Box>Total</Box>
-              <Box>${getTotalCartValue(items)}</Box>
+              <Box style={{fontSize: "1.6rem"}}>${getTotalCartValue(items)}</Box>
             </Box>
           </Stack>
         </Grid>
