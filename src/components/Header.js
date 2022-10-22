@@ -1,8 +1,8 @@
-import { ExposureRounded } from "@mui/icons-material";
+/* import { ExposureRounded } from "@mui/icons-material"; */
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Avatar, Button, Stack } from "@mui/material";
 import Box from "@mui/material/Box";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import "./Header.css";
 

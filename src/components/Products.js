@@ -92,6 +92,7 @@ const Products = () => {
       await fetchCart(localStorage.getItem("token"));
     }
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const performAPICall = async () => {
@@ -129,12 +130,7 @@ const Products = () => {
    *
    */
 
-  const [searchString, setSearchString] = useState("");
-
   const searchHandler = (e) => {
-    const value = e.target.value;
-    setSearchString(value);
-
     debounceSearch(e, 500);
   }
 
