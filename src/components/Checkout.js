@@ -123,7 +123,7 @@ const AddNewAddressView = ({
 
 const AddressItem = (props) => {
   return (
-    <Box className={"address-item" + (props.isSelected ? " selected" : "")} onClick={(e) => {e.target.classList.contains("address-item") && props.onSelect(props.id)}}>
+    <Box className={"address-item" + (props.isSelected ? " selected" : "")} onClick={() => props.onSelect(props.id)}>
       <Typography>{props.address}</Typography>
       <Button variant="text" onClick={() => props.onDelete(props.token, props.id)} startIcon={<Delete />}>Delete</Button>
     </Box>
