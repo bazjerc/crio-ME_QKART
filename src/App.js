@@ -7,7 +7,7 @@ import Checkout from "./components/Checkout";
 import Thanks from "./components/Thanks";
 
 export const config = {
-  endpoint: `https://blaz-jerenec-crio-qkart.herokuapp.com/api/v1`,
+  endpoint: `https://crio-qkart-api.onrender.com/api/v1`,
 };
 
 function App() {
